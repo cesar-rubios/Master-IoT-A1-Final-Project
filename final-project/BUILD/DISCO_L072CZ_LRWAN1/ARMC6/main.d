@@ -293,4 +293,4 @@ BUILD\DISCO_L072CZ_LRWAN1\ARMC6\main.o: main.cpp \
   mbed-os\platform\include\platform\mbed_stats.h \
   mbed-os\platform\include\platform\Stream.h \
   mbed-os\platform\include\platform\FileLike.h accelerometer.h \
-  temp_humid.h
+  temp_humid.h soil.h

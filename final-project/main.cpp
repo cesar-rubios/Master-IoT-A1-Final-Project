@@ -5,10 +5,10 @@
 
 // ZONA DE INCLUDES PARA LIBRERIAS DEL SISTEMA
 #include "mbed.h"
-
 // ZONA DE INCLUDES PARA OTROS ARCHIVOS
 #include "accelerometer.h"
 #include "temp_humid.h"
+#include "soil.h"
 
 // Definición de la variable I2C como global
 I2C i2c(PB_9, PB_8); // Definido aquí, solo una vez
@@ -21,8 +21,10 @@ DigitalOut blue(D12);
 // Definición de hilos
 Thread accelerometer_thread;
 Thread temp_humid_thread;
+Thread soil_thread;
 
 int main() {
+    soil_thread.start(soil_measurement);
     // Pone el LED en color rojo para asegurar inicio
     red = 0;    green = 1;    blue = 1;
     printf("INICIO DEL PROGRAMA:\n");
@@ -30,6 +32,7 @@ int main() {
     // Iniciar los hilos para los sensores
     accelerometer_thread.start(accel_measurement);
     temp_humid_thread.start(temp_humid_measurement);
+    
     
     // Bucle principal que imprime los valores del acelerómetro
     while (true) {
@@ -43,15 +46,20 @@ int main() {
         tempHumidMutex.lock();
         int temp = tempHumidData.temperature;
         int humid = tempHumidData.humidity;
-        tempHumidMutex.unlock();        
+        tempHumidMutex.unlock();    
+
+        soilMutex.lock();
+        float soil = soilData;   
+        soilMutex.unlock();
         
 
         printf("He leído valores:\n"
             "  Aceleración X: %d, Y: %d, Z: %d\n"
             "  Temperatura: %d ºC\n"
-            "  Humedad: %d %%\n\n",
-            x, y, z, temp, humid);
+            "  Humedad: %d % \n"
+            "  Soil Humidity : %.2f %%\n\n",
+            x, y, z, temp, humid, soil);
 
-        ThisThread::sleep_for(500ms); // Esperar un poco antes de la siguiente impresión
+        ThisThread::sleep_for(1000ms); // Esperar un poco antes de la siguiente impresión
     }
 }
