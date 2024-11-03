@@ -4,25 +4,23 @@
 AnalogIn sensor(PA_4);
 
 // Definición de la variable global para almacenar los datos
-volatile float soilData; // Definida aquí
+volatile int soilData;
 Mutex soilMutex; // Definido aquí
-
 
 void soil_measurement() {
 
-    float value = sensor.read();
-    float voltage = value * 3.3;  // Cambia esto si es necesario para tu sensor
-    printf("Valor leído: %.2f V\n", voltage);
+    printf("soil iniciado\n");
 
-    printf("hola soy el soil sensor \n");
+    while(true){
 
-    while (true) { // Agregar bucle infinito
-        // Bloquear el mutex antes de actualizar los datos
         soilMutex.lock();
-        soilData = sensor.read();
-        printf("Raw soil sensor value: %.2f\n", soilData);
-        soilMutex.unlock(); // Desbloquear el mutex
+        float valor = sensor.read();
+        int soilData = valor * 100;  // Escala para ver el valor como un entero
+        printf("Soil: %d\n", soilData);
+        soilMutex.unlock();
 
-        ThisThread::sleep_for(1000ms); // Esperar un poco antes de la siguiente lectura
+        ThisThread::sleep_for(5000ms);
+
     }
+
 }

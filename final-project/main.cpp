@@ -24,16 +24,15 @@ Thread temp_humid_thread;
 Thread soil_thread;
 
 int main() {
-    soil_thread.start(soil_measurement);
     // Pone el LED en color rojo para asegurar inicio
     red = 0;    green = 1;    blue = 1;
     printf("INICIO DEL PROGRAMA:\n");
 
     // Iniciar los hilos para los sensores
-    accelerometer_thread.start(accel_measurement);
-    temp_humid_thread.start(temp_humid_measurement);
-    
-    
+    //accelerometer_thread.start(accel_measurement);
+    //temp_humid_thread.start(temp_humid_measurement);
+    soil_thread.start(soil_measurement);
+        
     // Bucle principal que imprime los valores del acelerómetro
     while (true) {
         
@@ -49,15 +48,15 @@ int main() {
         tempHumidMutex.unlock();    
 
         soilMutex.lock();
-        float soil = soilData;   
-        soilMutex.unlock();
-        
+        int soil = soilData; 
+        printf("Soil: %d\n", soilData);  
+        soilMutex.unlock();      
 
         printf("He leído valores:\n"
             "  Aceleración X: %d, Y: %d, Z: %d\n"
             "  Temperatura: %d ºC\n"
             "  Humedad: %d % \n"
-            "  Soil Humidity : %.2f %%\n\n",
+            "  Soil Humidity : %d %\n\n",
             x, y, z, temp, humid, soil);
 
         ThisThread::sleep_for(1000ms); // Esperar un poco antes de la siguiente impresión
