@@ -55,7 +55,7 @@ void cambiarModo() {
                 modo_actual = NORMAL;
                 led1=0; led2=1; led3=0;
                 print_ticker.detach();
-                print_ticker.attach(&set_print_flag, 30);
+                print_ticker.attach(&set_print_flag, 10);
                 SLEEP_TIME = 30000;
                 break;
         }
@@ -98,7 +98,7 @@ int main() {
     // Configuración inicial del botón para detectar pulsación
     boton_usuario.fall(&cambiarModo);  // Detecta borde de caída (pulsación)
     led1=0; led2=1; led3=0; // modo inicial NORMAL
-    print_ticker.attach(&set_print_flag, 30); // mostramos los datos cada 30 segundos (modo inicial: normal)
+    print_ticker.attach(&set_print_flag, 10); // mostramos los datos cada 30 segundos (modo inicial: normal)
 
 
 

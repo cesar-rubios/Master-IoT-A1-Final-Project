@@ -35,6 +35,20 @@ const char* max_color(uint16_t r, uint16_t g, uint16_t b) {
 }
 
 
+void data_limits(){
+    
+    if(sensor_data.temperature <= 10 || sensor_data.temperature >= 30 )        { color_led(0, 0, 0);  } //blanco
+    else if(sensor_data.humidity >= 20 || sensor_data.humidity >= 80 )         { color_led(0, 0, 1);  } //amarillo
+    else if(sensor_data.brightness <= 10 || sensor_data.brightness >= 75 )     { color_led(0, 1, 0);  } //magenta
+    else if(sensor_data.soil <= 10 || sensor_data.soil >= 90 )                 { color_led(1, 0, 0);  } //cyan
+
+    else if(sensor_data.x <= -5 || sensor_data.x <= 5 || sensor_data.y <= -5 || sensor_data.y <= 5 || sensor_data.y <= -5 || sensor_data.y <= 5 ) { color_led(1, 0, 1);  } //verde
+    else if(sensor_data.r <= 75 || sensor_data.r >= 400 || sensor_data.g <= 75 || sensor_data.g >= 400 || sensor_data.b <= 75 || sensor_data.b >= 400) { color_led(1, 1, 0);  } //azul
+    
+    else{color_led(1, 1, 1);}
+}
+
+
 
 void obtener_datos_sensores(){
 
@@ -68,13 +82,17 @@ void obtener_datos_sensores(){
         TempHumidData data_th = temperature_humidity.get_data();   //obtenemos los datos medidos por el sensor
         sensor_data.humidity = data_th.humidity;                   
         sensor_data.temperature = data_th.temperature;
-
+      
         infrared_soil.measure();
         AnalogData data_an = infrared_soil.get_data();
         sensor_data.brightness = data_an.brightness;
         sensor_data.soil = data_an.soilMoisture;
 
         sensorDataMutex.unlock();
+
+        if(modo_actual==NORMAL){
+            data_limits();
+        }  
 
         ThisThread::sleep_for(SLEEP_TIME);
 
