@@ -3,10 +3,10 @@
 #include "sensors/accelerometer.h"
 #include "sensors/RGB.h"
 #include "sensors/temp_humid.h"
+#include "sensors/analog.h"
 
 DataSensors sensor_data;   // Variable definidad aquí para almacenar los datos
 Mutex sensorDataMutex;              //mutex para evitar accesos del hilo principal antes de terminar de escribir los valores leidos
-
 
 //pines digitales donde están los leds
 DigitalOut led_green(D11);
@@ -18,6 +18,7 @@ void color_led(int _red, int _green, int _blue) {
   led_green = _green;
   led_blue = _blue;
 }
+
 // Función para determinar el color dominante en el sensor RGB
 // también sirve en modo TEST de representar el color dominante en el LED
 const char* max_color(uint16_t r, uint16_t g, uint16_t b) {
@@ -45,8 +46,9 @@ void obtener_datos_sensores(){
     rgb.init();
 
     SI7021 temperature_humidity(i2c);           // definición de un objeto de tipo sensor humedad y temperatura
-    
 
+    AnalogSensor infrared_soil(PA_0, PA_4);
+    
     while (1) {
     
         sensorDataMutex.lock();
@@ -63,9 +65,14 @@ void obtener_datos_sensores(){
         sensor_data.dominant = max_color(sensor_data.r, sensor_data.g, sensor_data.b);
 
         temperature_humidity.measure();                         //medimos los valores de temp y humid
-        TempHumidData data = temperature_humidity.get_data();   //obtenemos los datos medidos por el sensor
-        sensor_data.humidity = data.humidity;                   
-        sensor_data.temperature = data.temperature;
+        TempHumidData data_th = temperature_humidity.get_data();   //obtenemos los datos medidos por el sensor
+        sensor_data.humidity = data_th.humidity;                   
+        sensor_data.temperature = data_th.temperature;
+
+        infrared_soil.measure();
+        AnalogData data_an = infrared_soil.get_data();
+        sensor_data.brightness = data_an.brightness;
+        sensor_data.soil = data_an.soilMoisture;
 
         sensorDataMutex.unlock();
 

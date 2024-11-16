@@ -34,7 +34,7 @@ public:
     void getRawData(uint16_t &r, uint16_t &g, uint16_t &b, uint16_t &c);
 
 private:
-    I2C &i2c;;
+    I2C &i2c;
 
     void write8(Register reg, uint8_t value);
     uint8_t read8(Register reg);

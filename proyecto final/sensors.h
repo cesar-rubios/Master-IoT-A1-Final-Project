@@ -23,7 +23,9 @@ struct DataSensors {
     float temperature; // Temperatura en grados Celsius
     float humidity;    // Humedad en porcentaje
 
-    //
+    //datos de los sensores analógicos
+    float soil;         // Humedad en % de la tierra
+    float brightness;   // Luminosidad 0-100
 };
 
 //definición de los modos de operación
