@@ -29,6 +29,9 @@ public:
     float getAccY(bool msbOnly = false);
     float getAccZ(bool msbOnly = false);
 
+    //función para el modo avanzado y detectar caidas
+    void enableFallDetection();
+
 private:
     I2C &i2c;
     uint8_t device_address;

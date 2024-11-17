@@ -14,9 +14,42 @@ void MMA8451Q::init() {
     // uint8_t range_data[2] = {REG_XYZ_DATA_CFG, 0x02};
     // writeRegs(range_data, 2);
 
-    // Poner el sensor en modo activo con el bit F_READ si deseas modo de lectura rápida
-    uint8_t active_data[2] = {REG_CTRL_REG_1, 0x03}; // 0x01 sin F_READ, o 0x03 con F_READ
+    //uint8_t active_data[2] = {REG_CTRL_REG_1, 0x03}; // Habilitar el sensor para que esté en modo activo
+    //writeRegs(active_data, 2);
+    
+    //CONFIGURACIÓN PARA ADVANCED MOOD CON DETECCIÓN DE CAIDA
+
+    // Poner el dispositivo en modo de espera (esto se hace para poder configurar correctamente el sensor)
+    uint8_t standby_data[2] = {REG_CTRL_REG_1, 0x20};
+    writeRegs(standby_data, 2);
+
+    // Configurar detección de caída libre en todos los ejes
+    uint8_t freefall_cfg[2] = {0x15, 0xB8}; // 0xB8 es el valor para habilitar detección en todos los ejes
+    writeRegs(freefall_cfg, 2);
+
+    // Umbral de caída 
+    uint8_t threshold_data[2] = {0x17, 0x03};
+    writeRegs(threshold_data, 2);
+
+    // Configuración del conteo de duración (más duración = menos sensibilidad)
+    uint8_t count_data[2] = {0x18, 0x18}; // Duración mínima para que se considere caída (en número de muestras)
+    writeRegs(count_data, 2);
+
+    // Habilitar interrupciones por caída
+    uint8_t interrupt_data[2] = {0x2D, 0x20}; // Habilitar FF_MT (Free Fall Motion Trigger)
+    writeRegs(interrupt_data, 2);
+
+    // Enviar la interrupción al pin INT1
+    uint8_t route_int[2] = {0x2E, 0x00}; // Enviar interrupción al pin INT1
+    writeRegs(route_int, 2);
+
+    // Activar el sensor en modo activo
+    uint8_t active_data[2] = {REG_CTRL_REG_1, 0x03}; // Habilitar el sensor para que esté en modo activo
     writeRegs(active_data, 2);
+    // Poner el sensor en modo activo con el bit F_READ si deseas modo de lectura rápida
+    
+
+    
 }
 
 // Get 'Who Am I' ID
@@ -73,4 +106,9 @@ void MMA8451Q::readRegs(int addr, uint8_t *data, int len) {
 // Write to sensor registers
 void MMA8451Q::writeRegs(uint8_t *data, int len) {
     i2c.write(device_address, (char *)data, len);
+}
+
+
+void MMA8451Q::enableFallDetection(){
+    
 }

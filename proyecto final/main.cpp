@@ -1,9 +1,11 @@
 #include "mbed.h"
 #include "sensors.h"
+#include "calculos.h"
 
 // modo inicial normal
 Modo modo_actual = NORMAL;
 int SLEEP_TIME = 1000;
+int tap_count = 0;
 
 // Configuración del botón en el pin PB_2
 InterruptIn boton_usuario(PB_2);
@@ -30,21 +32,22 @@ void set_print_flag() {
 Thread hilo_sensores;
 Thread hilo_calculos;
 
+// pin de interrupcion INT1 del acelerómetro para advanced mode
+InterruptIn accel_interrupt(PA_8); 
+void detect_fall() {
+    fall_detected = true;
+}
+
 // Función que alterna el modo de operación
 void cambiarModo() {
     if (!debounce_flag) {  // Comprobación anti-rebote
         debounce_flag = true;
 
+        tap_count++;
+
         // Cambiar al siguiente modo de operación
         switch (modo_actual) {
             case NORMAL:
-                modo_actual = ADVANCED;
-                led1=0; led2=0; led3=1;
-                print_ticker.detach();
-                print_ticker.attach(&set_print_flag, 5);
-                SLEEP_TIME = 5000;
-                break;
-            case ADVANCED:
                 modo_actual = TEST;
                 led1=1; led2=0; led3=0;
                 print_ticker.detach();
@@ -56,7 +59,7 @@ void cambiarModo() {
                 led1=0; led2=1; led3=0;
                 print_ticker.detach();
                 print_ticker.attach(&set_print_flag, 10);
-                SLEEP_TIME = 30000;
+                SLEEP_TIME = 10000;
                 break;
         }
 
@@ -70,62 +73,79 @@ void cambiarModo() {
 
 void info_pantalla() {
 
-    
     // Función para mostrar datos
     printf(
-
-        "\nSOIL MOISTURE: %.1f%% \n"
+        "\nNumer of taps: %d \n"
+        "SOIL MOISTURE: %.1f%% \n"
         "LIGHT: %.1f%% \n"
-        "GPS: -------- \n"
+        "GPS: #Sats: %d Lat(UTC): %.6f N Long(UTC): %.6f W Altitude: %.0f GPS time: %s \n"
         "COLOR SENSOR: Clear: %d Red: %d Green: %d Blue: %d -- Dominant color: %s \n"
         "ACCELEROMETERS: X_axis: %.2f m/s², Y_axis: %.2f m/s², Z_axis: %.2f m/s² \n"
         "TEMP/HUM: Temperature: %.1f ºC,    Relative Humidity: %.1f%% \n"
         "--------------------------\n\n",
+        tap_count,
         sensor_data.soil,
         sensor_data.brightness,
+        sensor_data.sats, sensor_data.lat, sensor_data.longi, sensor_data.alt, sensor_data.time,
         sensor_data.c, sensor_data.r, sensor_data.g, sensor_data.b, sensor_data.dominant,
         sensor_data.x, sensor_data.y, sensor_data.z,
         sensor_data.temperature, sensor_data.humidity
 
-    );
+   );
+   
 }
 
 int main() {
     printf("\n\n\n\n\n\n\n");
 
     hilo_sensores.start(obtener_datos_sensores);
-
+    //hilo_calculos.start(callback(hour_calculations));
+    
     // Configuración inicial del botón para detectar pulsación
     boton_usuario.fall(&cambiarModo);  // Detecta borde de caída (pulsación)
     led1=0; led2=1; led3=0; // modo inicial NORMAL
     print_ticker.attach(&set_print_flag, 10); // mostramos los datos cada 30 segundos (modo inicial: normal)
 
+    accel_interrupt.rise(&detect_fall); //si se interrumpe desde el acelerómetro, ejecutamos la ISR detect_fall
 
 
     while (true) {
-        // Si el flag print_flag está activa, mostramos los datos en pantalla
-        if (print_flag) {
-            print_flag = false;  // Restablece el flag
-            info_pantalla();     // Llama a la función de impresión
-        }
 
-        // Si el modo ha cambiado, se muestra el nuevo modo
-        if (modo_cambiado) {
-            modo_cambiado = false;  // Restablece la bandera
-            switch (modo_actual) {
-                case NORMAL:
-                    //printf("Modo actual: NORMAL\n");
-                    break;
-                case ADVANCED:
-                    //printf("Modo actual: ADVANCED\n");
-                    break;
-                case TEST:
-                    //printf("Modo actual: TEST\n");
-                    break;
+        if (fall_detected) {    //si se detecta una caida 
+            // modo AVANZADO
+            modo_actual = ADVANCED;
+            boton_usuario.disable_irq();
+            led1=0; led2=0;
+            led3 = !led3;
+            ThisThread::sleep_for(500);
+        }
+        else{
+            
+            // Si el flag print_flag está activa, mostramos los datos en pantalla
+            if (print_flag) {
+                print_flag = false;  // Restablece el flag
+                info_pantalla();     // Llama a la función de impresión
             }
-        }
 
-        // Permitir que el microcontrolador entre en bajo consumo hasta la próxima interrupción
-        sleep();
+            // Si el modo ha cambiado, se muestra el nuevo modo
+            if (modo_cambiado) {
+                modo_cambiado = false;  // Restablece la bandera
+                switch (modo_actual) {
+                    case NORMAL:
+                        //printf("Modo actual: NORMAL\n");
+                        break;
+                    case ADVANCED:
+                        //printf("Modo actual: ADVANCED\n");
+                        break;
+                    case TEST:
+                        //printf("Modo actual: TEST\n");
+                        break;
+                }
+            }
+
+            // Permitir que el microcontrolador entre en bajo consumo hasta la próxima interrupción
+            sleep();
+            }
+        
     }
 }

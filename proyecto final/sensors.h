@@ -4,7 +4,7 @@
 #include "mbed.h"
 #include <cstdint>
 
-// Estructura para almacenar los datos de temperatura y humedad
+// Estructura para almacenar los datos de los sensores
 struct DataSensors {
 
     //datos del sensor acelerómetro
@@ -26,6 +26,14 @@ struct DataSensors {
     //datos de los sensores analógicos
     float soil;         // Humedad en % de la tierra
     float brightness;   // Luminosidad 0-100
+
+    //datos GPS
+    int sats;           // número de satélites
+    float lat;          // latitud
+    float longi;        // longitud
+    float alt;          // altura
+    char* time;         // hora
+
 };
 
 //definición de los modos de operación
@@ -37,6 +45,8 @@ extern DataSensors sensor_data; // Variable externa para almacenar los datos
 extern Mutex sensorDataMutex; // Mutex externo para proteger el acceso a los datos de los sensores
 extern I2C i2c; // Declarar el objeto I2C como extern
 extern int SLEEP_TIME; //tiempo de espera entre lecturas de los sensores
+
+extern volatile bool fall_detected; //para la detección de caidas del modo advanced
 
 // Declaración de la función de medición
 void obtener_datos_sensores();
