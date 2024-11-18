@@ -4,8 +4,8 @@
 #include "mbed.h"
 #include "sensors.h"
 
-extern MemoryPool<DataSensors, 3> mpool;
-extern Queue<DataSensors, 3> queue;
+extern MemoryPool<DataSensors, 30> mpool;
+extern Queue<DataSensors, 30> queue;
 
 void calculos();
 

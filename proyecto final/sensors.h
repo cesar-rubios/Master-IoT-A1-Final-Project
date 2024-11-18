@@ -26,14 +26,14 @@ struct DataSensors {
     //datos de los sensores analógicos
     float soil;         // Humedad en % de la tierra
     float brightness;   // Luminosidad 0-100
-
+/*
     //datos GPS
     int sats;           // número de satélites
     float lat;          // latitud
     float longi;        // longitud
     float alt;          // altura
     char* time;         // hora
-
+*/
 };
 
 //definición de los modos de operación
@@ -49,8 +49,8 @@ extern int SLEEP_TIME; //tiempo de espera entre lecturas de los sensores
 extern volatile bool fall_detected; //para la detección de caidas del modo advanced
 extern volatile bool tap_detected; //para la detección de taps del modo advanced
 
-extern MemoryPool<DataSensors, 3> mpool;
-extern Queue<DataSensors, 3> queue;
+extern MemoryPool<DataSensors, 30> mpool;
+extern Queue<DataSensors, 30> queue;
 
 // Declaración de la función de medición
 void obtener_datos_sensores();

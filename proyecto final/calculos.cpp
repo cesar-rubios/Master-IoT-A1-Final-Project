@@ -7,6 +7,7 @@
 #include <map>
 #include <string>
 
+
 // Constants
 #define HOUR_IN_MS 30000 // 1 minute for testing, change to 3600000 for 1 hour
 
@@ -48,7 +49,6 @@ void calculos() {
 
     if (evt.status == osEventMessage && message != nullptr) {
       // Update sums for mean calculation
-      printf("MENSAJE RECIBIDO \n\n");
       temp_sum += message->temperature;
       humidity_sum += message->humidity;
       brightness_sum += message->brightness;
@@ -80,15 +80,16 @@ void calculos() {
 
       mpool.free(message); // Free the allocated memory for the message
 
-      counter++;
+      counter ++;
 
       // Check if 1 hour has passed
       if (timer.read_ms() >= HOUR_IN_MS) {
         // Calculate mean values
         printf("---------------------------------------------MEDIAS------------"
                "------------- \n");
-        float temp_mean = temp_sum / counter; // Use color_count.size() instead
-                                              // of temperature_data.size()
+        float temp_mean =
+            temp_sum / counter; // Use color_count.size() instead of
+                                           // temperature_data.size()
         float humidity_mean = humidity_sum / counter;
         float brightness_mean = brightness_sum / counter;
         float soil_mean = soil_sum / counter;

@@ -80,7 +80,7 @@ void info_pantalla() {
         "\nNumer of taps: %d \n"
         "SOIL MOISTURE: %.1f%% \n"
         "LIGHT: %.1f%% \n"
-        "GPS: #Sats: %d Lat(UTC): %.6f N Long(UTC): %.6f W Altitude: %.0f GPS time: %s \n"
+        //"GPS: #Sats: %d Lat(UTC): %.6f N Long(UTC): %.6f W Altitude: %.0f GPS time: %s \n"
         "COLOR SENSOR: Clear: %d Red: %d Green: %d Blue: %d -- Dominant color: %s \n"
         "ACCELEROMETERS: X_axis: %.2f m/s², Y_axis: %.2f m/s², Z_axis: %.2f m/s² \n"
         "TEMP/HUM: Temperature: %.1f ºC,    Relative Humidity: %.1f%% \n"
@@ -88,7 +88,7 @@ void info_pantalla() {
         tap_count,
         sensor_data.soil,
         sensor_data.brightness,
-        sensor_data.sats, sensor_data.lat, sensor_data.longi, sensor_data.alt, sensor_data.time,
+        //sensor_data.sats, sensor_data.lat, sensor_data.longi, sensor_data.alt, sensor_data.time,
         sensor_data.c, sensor_data.r, sensor_data.g, sensor_data.b, sensor_data.dominant,
         sensor_data.x, sensor_data.y, sensor_data.z,
         sensor_data.temperature, sensor_data.humidity
