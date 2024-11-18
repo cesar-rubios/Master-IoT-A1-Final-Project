@@ -9,8 +9,9 @@
 DataSensors sensor_data;   // Variable definidad aquí para almacenar los datos
 Mutex sensorDataMutex;              //mutex para evitar accesos del hilo principal antes de terminar de escribir los valores leidos
 
-//flag para el modo avanzado y detectar la caida
+//flag para el modo avanzado y detectar la caida o el tap
 volatile bool fall_detected = false;
+volatile bool tap_detected = false;
 
 //pines digitales donde están los leds
 DigitalOut led_green(D11);
@@ -27,6 +28,10 @@ void color_led(int _red, int _green, int _blue) {
 #define GPS_TX_PIN PA_9
 #define GPS_RX_PIN PA_10
 #define GPS_ENABLE_PIN PA_12
+
+//intercambio de calculos
+MemoryPool<DataSensors, 5> mpool;
+Queue<DataSensors, 5> queue;
 
 // Función para determinar el color dominante en el sensor RGB
 // también sirve en modo TEST de representar el color dominante en el LED
@@ -114,11 +119,32 @@ void obtener_datos_sensores(){
         sensor_data.alt = gps.getAltitude();
         sensor_data.time = gps.getGPSTime();
 
-        sensorDataMutex.unlock();
+        
 
         if(modo_actual==NORMAL){
             data_limits();
         }  
+
+        DataSensors *mensaje = mpool.alloc();
+        if (mensaje != nullptr) {
+            mensaje->x = sensor_data.x;
+            mensaje->y = sensor_data.y;
+            mensaje->z = sensor_data.z;
+            mensaje->r = sensor_data.r;
+            mensaje->g = sensor_data.g;
+            mensaje->b = sensor_data.b;
+            mensaje->c = sensor_data.c;
+            mensaje->dominant = sensor_data.dominant;
+            mensaje->temperature = sensor_data.temperature;
+            mensaje->humidity = sensor_data.humidity;
+            mensaje->brightness = sensor_data.brightness;
+            mensaje->soil = sensor_data.soil;
+            queue.put(mensaje);
+        } else {
+            printf("Error: MemoryPool lleno\n");
+        }
+
+        sensorDataMutex.unlock();
 
         while(fall_detected){
             led_red = 1; led_green = 1; led_blue = 1;

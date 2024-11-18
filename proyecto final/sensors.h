@@ -47,8 +47,13 @@ extern I2C i2c; // Declarar el objeto I2C como extern
 extern int SLEEP_TIME; //tiempo de espera entre lecturas de los sensores
 
 extern volatile bool fall_detected; //para la detección de caidas del modo advanced
+extern volatile bool tap_detected; //para la detección de taps del modo advanced
+
+extern MemoryPool<DataSensors, 5> mpool;
+extern Queue<DataSensors, 5> queue;
 
 // Declaración de la función de medición
 void obtener_datos_sensores();
+void calculos();
 
 #endif // SENSORS_H

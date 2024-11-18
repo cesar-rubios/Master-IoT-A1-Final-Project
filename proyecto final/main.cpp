@@ -29,22 +29,24 @@ void set_print_flag() {
 }
 
 //definición de los hilos
-Thread hilo_sensores;
-Thread hilo_calculos;
+Thread hilo_sensores(osPriorityNormal, 2*1024);
+Thread hilo_calculos(osPriorityNormal, 4*1024);
 
 // pin de interrupcion INT1 del acelerómetro para advanced mode
 InterruptIn accel_interrupt(PA_8); 
 void detect_fall() {
     fall_detected = true;
 }
+// pin de interrupcion INT2 del acelerómetro para advanced mode
+InterruptIn accel_tap(PA_11);
+void detect_tap() {
+    tap_detected = true;
+}
 
 // Función que alterna el modo de operación
 void cambiarModo() {
     if (!debounce_flag) {  // Comprobación anti-rebote
         debounce_flag = true;
-
-        tap_count++;
-
         // Cambiar al siguiente modo de operación
         switch (modo_actual) {
             case NORMAL:
@@ -96,10 +98,11 @@ void info_pantalla() {
 }
 
 int main() {
+
     printf("\n\n\n\n\n\n\n");
 
     hilo_sensores.start(obtener_datos_sensores);
-    //hilo_calculos.start(callback(hour_calculations));
+    hilo_calculos.start(calculos);
     
     // Configuración inicial del botón para detectar pulsación
     boton_usuario.fall(&cambiarModo);  // Detecta borde de caída (pulsación)
@@ -107,6 +110,7 @@ int main() {
     print_ticker.attach(&set_print_flag, 10); // mostramos los datos cada 30 segundos (modo inicial: normal)
 
     accel_interrupt.rise(&detect_fall); //si se interrumpe desde el acelerómetro, ejecutamos la ISR detect_fall
+    accel_tap.rise(&detect_tap); //si se interrumpe desde el acelerómetro, ejecutamos la ISR detect_tap
 
 
     while (true) {
@@ -120,6 +124,10 @@ int main() {
             ThisThread::sleep_for(500);
         }
         else{
+
+            if (tap_detected){  //si se detecta un tap
+                tap_count++;
+            }
             
             // Si el flag print_flag está activa, mostramos los datos en pantalla
             if (print_flag) {

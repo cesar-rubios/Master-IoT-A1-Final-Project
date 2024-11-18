@@ -7,20 +7,11 @@ MMA8451Q::MMA8451Q(I2C &i2c_ref, uint8_t address) : i2c(i2c_ref), device_address
 
 // Initialize sensor by activating it
 void MMA8451Q::init() {
-    // uint8_t standby_data[2] = {REG_CTRL_REG_1, 0x00};
-    // writeRegs(standby_data, 2);
-
-    // // Configurar el rango a ±8g
-    // uint8_t range_data[2] = {REG_XYZ_DATA_CFG, 0x02};
-    // writeRegs(range_data, 2);
-
-    //uint8_t active_data[2] = {REG_CTRL_REG_1, 0x03}; // Habilitar el sensor para que esté en modo activo
-    //writeRegs(active_data, 2);
     
-    //CONFIGURACIÓN PARA ADVANCED MOOD CON DETECCIÓN DE CAIDA
+    //CONFIGURACIÓN PARA ADVANCED MOOD CON DETECCIÓN DE CAIDA Y TAPS
 
     // Poner el dispositivo en modo de espera (esto se hace para poder configurar correctamente el sensor)
-    uint8_t standby_data[2] = {REG_CTRL_REG_1, 0x20};
+    uint8_t standby_data[2] = {REG_CTRL_REG_1, 0x08};
     writeRegs(standby_data, 2);
 
     // Configurar detección de caída libre en todos los ejes
@@ -32,24 +23,39 @@ void MMA8451Q::init() {
     writeRegs(threshold_data, 2);
 
     // Configuración del conteo de duración (más duración = menos sensibilidad)
-    uint8_t count_data[2] = {0x18, 0x18}; // Duración mínima para que se considere caída (en número de muestras)
+    uint8_t count_data[2] = {0x18, 0x06}; // Duración mínima para que se considere caída (en número de muestras)
     writeRegs(count_data, 2);
 
-    // Habilitar interrupciones por caída
-    uint8_t interrupt_data[2] = {0x2D, 0x20}; // Habilitar FF_MT (Free Fall Motion Trigger)
-    writeRegs(interrupt_data, 2);
+    uint8_t tap_cfg[2] = {0x15, 0x15}; 
+    writeRegs(tap_cfg, 2);
 
-    // Enviar la interrupción al pin INT1
-    uint8_t route_int[2] = {0x2E, 0x00}; // Enviar interrupción al pin INT1
-    writeRegs(route_int, 2);
+    uint8_t tap_thsx[2] = {0x15, 0x19}; 
+    writeRegs(tap_thsx, 2);
+
+    uint8_t tap_thsy[2] = {0x15, 0x19}; 
+    writeRegs(tap_thsy, 2);
+
+    uint8_t tap_thsz[2] = {0x15, 0x2A}; 
+    writeRegs(tap_thsz, 2);
+
+    uint8_t tap_tmlt[2] = {0x26, 0x50}; 
+    writeRegs(tap_tmlt, 2);
+
+    uint8_t tap_ltcy[2] = {0x27, 0xF0}; 
+    writeRegs(tap_ltcy, 2);
+
+    uint8_t en_int[2] = {REG_CTRL_REG_4, 0x0C}; //habilitar taps y ff
+    writeRegs(en_int, 2);
+
+    // Configurar las interrupciones para que se activen cuando se detecten eventos
+    uint8_t int_cfg[2] = {REG_CTRL_REG_5, 0x08}; // Habilitar interrupciones: INT1 para Free Fall, INT2 para Taps
+    writeRegs(int_cfg, 2);
 
     // Activar el sensor en modo activo
     uint8_t active_data[2] = {REG_CTRL_REG_1, 0x03}; // Habilitar el sensor para que esté en modo activo
     writeRegs(active_data, 2);
     // Poner el sensor en modo activo con el bit F_READ si deseas modo de lectura rápida
-    
-
-    
+        
 }
 
 // Get 'Who Am I' ID
@@ -106,6 +112,18 @@ void MMA8451Q::readRegs(int addr, uint8_t *data, int len) {
 // Write to sensor registers
 void MMA8451Q::writeRegs(uint8_t *data, int len) {
     i2c.write(device_address, (char *)data, len);
+}
+
+void MMA8451Q::write_register(uint8_t reg, uint8_t value) {
+    char data[2] = {static_cast<char>(reg), static_cast<char>(value)};
+    i2c.write((device_address << 1), data, 2);  // `address` es la dirección I2C del dispositivo
+}
+
+char MMA8451Q::read_register(uint8_t reg) {
+    char value;
+    i2c.write((device_address << 1), reinterpret_cast<char*>(&reg), 1);  // Envía el registro
+    i2c.read((device_address << 1) | 1, &value, 1);  // Lee el valor
+    return value;
 }
 
 
