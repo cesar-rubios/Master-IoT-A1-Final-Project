@@ -31,7 +31,6 @@
 #define PULSE_LTCY   0x27
 
 
-
 #define UINT14_MAX      16383  // 14-bit unsigned max value for 2's complement conversion
 
 class MMA8451Q {

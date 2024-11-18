@@ -26,22 +26,22 @@ void MMA8451Q::init() {
     uint8_t count_data[2] = {0x18, 0x06}; // Duración mínima para que se considere caída (en número de muestras)
     writeRegs(count_data, 2);
 
-    uint8_t tap_cfg[2] = {0x15, 0x15}; 
+    uint8_t tap_cfg[2] = {0x15, 0x15};  //configuración del registro para habilitar single tap
     writeRegs(tap_cfg, 2);
 
-    uint8_t tap_thsx[2] = {0x15, 0x19}; 
+    uint8_t tap_thsx[2] = {0x15, 0x19}; // limite del valor X 1,575g
     writeRegs(tap_thsx, 2);
 
-    uint8_t tap_thsy[2] = {0x15, 0x19}; 
+    uint8_t tap_thsy[2] = {0x15, 0x19};  // limite del valor Y 1,575g
     writeRegs(tap_thsy, 2);
 
-    uint8_t tap_thsz[2] = {0x15, 0x2A}; 
+    uint8_t tap_thsz[2] = {0x15, 0x2A}; // limite del valor Z 2,65g
     writeRegs(tap_thsz, 2);
 
-    uint8_t tap_tmlt[2] = {0x26, 0x50}; 
+    uint8_t tap_tmlt[2] = {0x26, 0x50}; // ajuste de tiempo en 50ms
     writeRegs(tap_tmlt, 2);
 
-    uint8_t tap_ltcy[2] = {0x27, 0xF0}; 
+    uint8_t tap_ltcy[2] = {0x27, 0xF0}; // latencia de 300ms para evitar rebote
     writeRegs(tap_ltcy, 2);
 
     uint8_t en_int[2] = {REG_CTRL_REG_4, 0x0C}; //habilitar taps y ff

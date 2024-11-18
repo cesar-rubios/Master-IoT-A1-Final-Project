@@ -29,9 +29,8 @@ void color_led(int _red, int _green, int _blue) {
 #define GPS_RX_PIN PA_10
 #define GPS_ENABLE_PIN PA_12
 
-//intercambio de calculos
-MemoryPool<DataSensors, 5> mpool;
-Queue<DataSensors, 5> queue;
+MemoryPool<DataSensors, 3> mpool;
+Queue<DataSensors, 3> queue;
 
 // Función para determinar el color dominante en el sensor RGB
 // también sirve en modo TEST de representar el color dominante en el LED
@@ -120,10 +119,10 @@ void obtener_datos_sensores(){
         sensor_data.time = gps.getGPSTime();
 
         
-
         if(modo_actual==NORMAL){
             data_limits();
         }  
+        
 
         DataSensors *mensaje = mpool.alloc();
         if (mensaje != nullptr) {
@@ -142,14 +141,17 @@ void obtener_datos_sensores(){
             queue.put(mensaje);
         } else {
             printf("Error: MemoryPool lleno\n");
+            mpool.free(mensaje);
         }
 
         sensorDataMutex.unlock();
 
         while(fall_detected){
             led_red = 1; led_green = 1; led_blue = 1;
-            ThisThread::sleep_for(SLEEP_TIME);
+            sleep();
         }
+
+        ThisThread::sleep_for(SLEEP_TIME);
     }
 
 }

@@ -1,7 +1,10 @@
 {
     "target_overrides": {
         "*": {
-            "target.printf_lib": "std"
+            "target.printf_lib": "std",
+            "rtos.main-thread-stack-size": 8192,
+            "platform.heap-stats-enabled": true,
+            "platform.stack-stats-enabled": true
         }
     }
 }

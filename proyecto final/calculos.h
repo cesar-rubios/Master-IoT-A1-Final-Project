@@ -4,14 +4,8 @@
 #include "mbed.h"
 #include "sensors.h"
 
-struct message_t{
-    float soil;   
-    float brightness;  
-           
-};
-
-extern MemoryPool<DataSensors, 5> mpool;
-extern Queue<DataSensors, 5> queue;
+extern MemoryPool<DataSensors, 3> mpool;
+extern Queue<DataSensors, 3> queue;
 
 void calculos();
 

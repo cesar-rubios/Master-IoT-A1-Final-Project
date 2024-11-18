@@ -29,8 +29,8 @@ void set_print_flag() {
 }
 
 //definición de los hilos
-Thread hilo_sensores(osPriorityNormal, 2*1024);
-Thread hilo_calculos(osPriorityNormal, 4*1024);
+Thread hilo_sensores (osPriorityNormal, 2048);
+Thread hilo_calculos (osPriorityNormal, 4096);
 
 // pin de interrupcion INT1 del acelerómetro para advanced mode
 InterruptIn accel_interrupt(PA_8); 
@@ -110,7 +110,7 @@ int main() {
     print_ticker.attach(&set_print_flag, 10); // mostramos los datos cada 30 segundos (modo inicial: normal)
 
     accel_interrupt.rise(&detect_fall); //si se interrumpe desde el acelerómetro, ejecutamos la ISR detect_fall
-    accel_tap.rise(&detect_tap); //si se interrumpe desde el acelerómetro, ejecutamos la ISR detect_tap
+    accel_tap.fall(&detect_tap); //si se interrumpe desde el acelerómetro, ejecutamos la ISR detect_tap
 
 
     while (true) {
@@ -127,6 +127,7 @@ int main() {
 
             if (tap_detected){  //si se detecta un tap
                 tap_count++;
+                tap_detected = false;
             }
             
             // Si el flag print_flag está activa, mostramos los datos en pantalla
